@@ -20,7 +20,7 @@ const NodeManagerPanel: React.FC = () => {
     const listService = new ROSLIB.Service({
       ros: ros,
       name: '/node_manager/list_nodes',
-      serviceType: 'NodeManager/ListNodes',
+      serviceType: 'interfaces/srv/ListNodes',
     });
     const request = new ROSLIB.ServiceRequest({});
     listService.callService(request, (result: any) => {
@@ -37,12 +37,12 @@ const NodeManagerPanel: React.FC = () => {
   }, [ros, connectionStatus]);
 
   // service to do basic operations on the nodes and shit
-  const callNodeService = (serviceName: 'start' | 'stop' | 'restart', nodeName: string) => {
+  const callNodeService = (serviceName: 'launch_node' | 'stop_node', serviceType: 'LaunchNode' | 'StopNode', nodeName: string) => {
     if (!ros || connectionStatus !== 'connected') return;
     const service = new ROSLIB.Service({
       ros: ros,
-      name: `/node_manager/${serviceName}`,
-      serviceType: `NodeManager/${capitalizeFirstLetter(serviceName)}Node`,
+      name: `/node_manager/${serviceName}_node`,
+      serviceType: `interfaces/srv/${serviceType}`,
     });
     const request = new ROSLIB.ServiceRequest({ node_name: nodeName });
     service.callService(request, (result: any) => {
@@ -52,9 +52,9 @@ const NodeManagerPanel: React.FC = () => {
     });
   };
 
-  const handleStart = (nodeName: string) => callNodeService('start', nodeName);
-  const handleStop = (nodeName: string) => callNodeService('stop', nodeName);
-  const handleRestart = (nodeName: string) => callNodeService('restart', nodeName);
+  const handleStart = (nodeName: string) => callNodeService('launch_node', 'LaunchNode', nodeName);
+  const handleStop = (nodeName: string) => callNodeService('stop_node', 'StopNode', nodeName);
+  // const handleRestart = (nodeName: string) => callNodeService('restart', nodeName);
 
   const capitalizeFirstLetter = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -91,9 +91,9 @@ const NodeManagerPanel: React.FC = () => {
                       <button onClick={() => handleStop(node.name)} style={{ marginRight: '0.5rem' }}>
                         Stop
                       </button>
-                      <button onClick={() => handleRestart(node.name)}>
+                      {/* <button onClick={() => handleRestart(node.name)}>
                         Restart
-                      </button>
+                      </button> */}
                     </td>
                   </tr>
                 ))}
