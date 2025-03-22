@@ -137,7 +137,7 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
   const api: GstWebRTCAPI = new GstWebRTCAPI(gstWebRTCConfig);
   apiRef.current = api;
 
-  const sendRequest = (preset: WebRTCRosClientConfig) => {
+  const newPreset = (presetName: string, camRequest: VideoOutRequest) => {
 
     if (config.mockMode) {
       console.log('Mock mode enabled, ros service requests not available, ya goof!');
@@ -151,16 +151,16 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
 
     const startVideoSrv = new ROSLIB.Service({
       ros,
-      name: preset.videoServiceName!,
-      serviceType: preset.videoServiceMessageType!,
+      name: config.videoServiceName!,
+      serviceType: config.videoServiceMessageType!,
     });
 
-    const request: VideoOutRequest = preset.defaultVideoRequest!;
+    const request: VideoOutRequest = camRequest;
     startVideoSrv.callService(new ROSLIB.ServiceRequest(request), (response: VideoOutResponse) => {
       if (response.success) {
-        console.log(`Video stream set to new preset: ${preset.videoServiceName}`);
+        console.log(`Video stream set to new preset ${presetName}`);
       } else {
-        console.error(`Failed to video preset to ${preset.videoServiceName}`);
+        console.error(`Failed to change video preset to ${presetName}`);
       }
     });
   }
@@ -205,13 +205,87 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
       <div style={{width: '100%', height: '10vh', display: 'flex'}}>
         <button 
           style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
-          onClick= {() => sendRequest(defaultConfig)}
+          onClick= {() => newPreset("test",
+          {
+            height: 480,
+            width: 640,
+            framerate: 30,
+            num_sources: 1,
+            sources: [
+              {
+                name: 'test',
+                width: 100,
+                height: 100,
+                origin_x: 0,
+                origin_y: 0,
+              },
+            ],
+          })}
         >Preset 1</button>
-        <button style={{fontSize: '1.5rem', width:'100%', height:'100%'}}>Preset 2</button>
-        <button style={{fontSize: '1.5rem', width:'100%', height:'100%'}}>Preset 3</button>
-        <button style={{fontSize: '1.5rem', width:'100%', height:'100%'}}>Preset 4</button>
-        <button style={{fontSize: '1.5rem', width:'100%', height:'100%'}}>Preset 5</button>
+        <button 
+          style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
+          onClick= {() => newPreset("test",
+            {
+              height: 480,
+              width: 640,
+              framerate: 30,
+              num_sources: 1,
+              sources: [
+                {
+                  name: 'test',
+                  width: 100,
+                  height: 100,
+                  origin_x: 0,
+                  origin_y: 0,
+                },
+              ],
+            })}
+        >Preset 2</button>
+        <button 
+          style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
+          onClick= {() => newPreset("test",
+            {
+              height: 480,
+              width: 640,
+              framerate: 30,
+              num_sources: 1,
+              sources: [
+                {
+                  name: 'test',
+                  width: 100,
+                  height: 100,
+                  origin_x: 0,
+                  origin_y: 0,
+                },
+              ],
+            })}
+            >Preset 3</button>
+        <button 
+          style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
+          onClick= {() => newPreset("test",
+          {
+            height: 480,
+            width: 640,
+            framerate: 30,
+            num_sources: 1,
+            sources: [
+              {
+                name: 'test',
+                width: 100,
+                height: 100,
+                origin_x: 0,
+                origin_y: 0,
+              },
+            ],
+          })}
+        >Preset 4</button>
+        {/* <button 
+          style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
+          onClick= {() => newPreset("test", getElementById("customField").innerHTML)}
+        >Custom Field</button> */}
       </div>
+      <input id="customField" type="text" name="custom-preset"></input>
+      
       <div>
         <button onClick={startVideoService}>Start Video Stream</button>
         {/* <button onClick={stopVideoStream}>Stop Video Stream</button> */}
