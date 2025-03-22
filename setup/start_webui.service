@@ -3,8 +3,9 @@ Description = Start ROS 2 Web UI
 After = network.target
 
 [Service]
-ExecStart = user/local/bin/start_webui.sh
-Restart = always
+Type=simple
+ExecStart=%i
+
 
 [Install]
-WantedBy = multti-user.target
+WantedBy = multi-user.target
