@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "open": "concurrently \"npm run dev\" \"sleepms 2000 && open http://localhost:3000/dashboard && open http://localhost:3000/video\""
   },
   "dependencies": {
     "@react-three/drei": "^9.121.4",
@@ -29,8 +30,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/roslib": "^1.3.5",
+    "concurrently": "^9.1.2",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
+    "sleep-ms": "^2.0.1",
     "typescript": "^5"
   }
 }
