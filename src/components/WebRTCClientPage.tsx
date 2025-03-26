@@ -196,7 +196,21 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
     });
   };
 
+  const [customPreset, setCustomPreset] = useState('');
 
+  const handleCustomFieldChange = (e: any) => {
+    setCustomPreset(e.target.value);
+  };
+
+  const handlePresetButtonClick = () => {
+    try {
+      const parsedPreset = JSON.parse(customPreset);
+
+      newPreset("test", parsedPreset);
+    } catch (error) {
+      alert('Invalid JSON. Please correct the input.');
+    }
+  };
 
   return (
     <div
@@ -279,12 +293,25 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
             ],
           })}
         >Preset 4</button>
-        {/* <button 
-          style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
-          onClick= {() => newPreset("test", getElementById("customField").innerHTML)}
-        >Custom Field</button> */}
+        <button 
+          style={{fontSize: '1.5rem', width: '100%', height: '100%'}}
+          onClick={handlePresetButtonClick}
+          // onClick={() => console.log(customPreset)}
+        >
+          Custom Field
+        </button>
       </div>
-      <input id="customField" type="text" name="custom-preset"></input>
+      <div>
+        <label htmlFor="customField">Enter custom JSON preset:</label>
+        <textarea
+          id="customField"
+          value={customPreset}
+          onChange={handleCustomFieldChange}
+          rows={10}
+          cols={50}
+          placeholder='"height": 480, &#10;"width": 640, &#10;"framerate": 30, &#10;"num_sources": 1, &#10;"sources": [{&#10;"name": "test", &#10;"width": 100, &#10;"height": 100&#10;}]'
+        ></textarea>
+      </div>
       
       <div>
         <button onClick={startVideoService}>Start Video Stream</button>
