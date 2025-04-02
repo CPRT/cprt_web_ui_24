@@ -301,20 +301,35 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
           Custom Field
         </button>
       </div>
-      <div>
-        <label htmlFor="customField">Enter custom JSON preset:</label>
+      <div style={{width: '100%', height: '10vh', display: 'flex', flexDirection: 'column', padding: '10px 0'}}>
+        <label htmlFor="customField" style={{padding: '25px, 0'}}>Enter custom JSON preset:</label>
+        {/* <pre>
+        {`{
+          "height": 480,
+          "width": 640,
+          "framerate": 30,
+          "num_sources": 1,
+          "sources": [
+            {
+              "name": "test",
+              "width": 100,
+              "height": 100
+            }
+          ]
+        }`}
+        </pre> */}
         <textarea
           id="customField"
           value={customPreset}
           onChange={handleCustomFieldChange}
-          rows={10}
+          rows={30}
           cols={50}
           placeholder='"height": 480, &#10;"width": 640, &#10;"framerate": 30, &#10;"num_sources": 1, &#10;"sources": [{&#10;"name": "test", &#10;"width": 100, &#10;"height": 100&#10;}]'
         ></textarea>
       </div>
       
       <div>
-        <button onClick={startVideoService}>Start Video Stream</button>
+        <button onClick={startVideoService} style={{marginBottom: '30px'}}>Start Video Stream</button>
         {/* <button onClick={stopVideoStream}>Stop Video Stream</button> */}
       </div>
       
