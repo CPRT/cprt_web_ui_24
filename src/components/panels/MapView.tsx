@@ -26,8 +26,8 @@ const MapView: React.FC = () => {
     >
       {/* TODO: need to make this run offline*/}
       <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
+        url="http://localhost:3650/api/maps/streets/{z}/{x}/{y}.jpg" // For tiles (doesn't work): http://localhost:3650/api/tiles/FullOttawa/{z}/{x}/{y}.jpg
+        attribution="&copy; Maptiler server"
       />
       <MapInteractionHandler />
       {waypoints.map((wp, index) => (
