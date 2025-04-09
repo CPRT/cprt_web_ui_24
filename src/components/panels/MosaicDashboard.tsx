@@ -85,6 +85,7 @@ const MosaicDashboard: React.FC = () => {
         renderTile={renderTile}
         initialValue={mosaicLayout}
         onChange={setMosaicLayout}
+        blueprintNamespace="bp5"
       />
       <style jsx global>{`
         .mosaic {
