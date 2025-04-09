@@ -13,9 +13,10 @@ import WebRTCClientPanel from './WebRTCClientPanel';
 import MapView from './MapView';
 import WaypointList from './WaypointList';
 import SystemTelemetryPanel from './SystemTelemetryPanel';
+import OrientationDisplayPanel from './OrientationDisplayPanel';
 import GasSensor from './GasSensor';
 
-type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'gasSensor';
+type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'gasSensor' | 'orientationDisplay';
 
 const MosaicDashboard: React.FC = () => {
   // TODO: paramaterize layout for custom layout configs
@@ -24,7 +25,12 @@ const MosaicDashboard: React.FC = () => {
     first: {
       direction: 'column',
       first: 'mapView',
-      second: 'webrtcStream',
+      second: {
+        direction: 'row',
+        first: 'webrtcStream',
+        second: 'orientationDisplay',
+        splitPercentage: 75,
+      },
       splitPercentage: 50,
     },
     second: {
@@ -78,6 +84,12 @@ const MosaicDashboard: React.FC = () => {
         return (
           <MosaicWindow<MosaicKey> title="System Telemetry" path={path}>
             <SystemTelemetryPanel />
+          </MosaicWindow>
+        );
+      case 'orientationDisplay':
+        return (
+          <MosaicWindow<MosaicKey> title="Rover Orientation" path={path}>
+            <OrientationDisplayPanel />
           </MosaicWindow>
         );
       case 'gasSensor':
