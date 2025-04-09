@@ -1,13 +1,32 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import ROSLIB from 'roslib';
 import { useROS } from '@/ros/ROSContext';
+
+type MotorStatus = {
+  velocity: number;
+  temperature: number;
+  output_current: number;
+  bus_voltage: number;
+};
 
 const OrientationDisplayPanel: React.FC = () => {
   const { ros } = useROS();
   const containerRef = useRef<HTMLDivElement>(null);
   const cubeRef = useRef<THREE.Mesh | null>(null);
+
+  const [motorStats, setMotorStats] = useState<{
+    fl: MotorStatus | null;
+    fr: MotorStatus | null;
+    rl: MotorStatus | null;
+    rr: MotorStatus | null;
+  }>({
+    fl: null,
+    fr: null,
+    rl: null,
+    rr: null,
+  });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -29,14 +48,12 @@ const OrientationDisplayPanel: React.FC = () => {
     scene.add(light);
     scene.add(new THREE.AmbientLight(0x444444));
 
-    // UGV body
     const bodyGeometry = new THREE.BoxGeometry(1.2, 0.4, 2);
     const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x156289 });
     const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
     scene.add(body);
     cubeRef.current = body;
 
-    // Wheels
     const createWheel = () => {
       const geo = new THREE.CylinderGeometry(0.2, 0.2, 0.1, 32);
       const mat = new THREE.MeshStandardMaterial({ color: 0xE91C24 });
@@ -58,7 +75,6 @@ const OrientationDisplayPanel: React.FC = () => {
       body.add(wheel);
     });
 
-    // Resize observer to update the renderer and camera on container resize
     const resizeObserver = new ResizeObserver(() => {
       if (containerRef.current) {
         renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
@@ -87,6 +103,7 @@ const OrientationDisplayPanel: React.FC = () => {
       ros,
       name: '/zed/zed_node/imu/data',
       messageType: 'sensor_msgs/Imu',
+      throttle_rate: 100,
     });
 
     const handleIMU = (msg: any) => {
@@ -102,10 +119,66 @@ const OrientationDisplayPanel: React.FC = () => {
     return () => imuTopic.unsubscribe(handleIMU);
   }, [ros]);
 
+  useEffect(() => {
+    if (!ros) return;
+
+    const motors = {
+      fl: '/motor_fl/status',
+      fr: '/motor_fr/status',
+      rl: '/motor_rl/status',
+      rr: '/motor_rr/status',
+    };
+
+    const subscriptions = Object.entries(motors).map(([key, topicName]) => {
+      const topic = new ROSLIB.Topic({
+        ros,
+        name: topicName,
+        messageType: 'your_msgs/MotorStatus',
+        throttle_rate: 100,
+      });
+
+      const handler = (msg: any) => {
+        setMotorStats(prev => ({
+          ...prev,
+          [key]: {
+            velocity: msg.velocity,
+            temperature: msg.temperature,
+            output_current: msg.output_current,
+            bus_voltage: msg.bus_voltage,
+          },
+        }));
+      };
+
+      topic.subscribe(handler);
+      return () => topic.unsubscribe(handler);
+    });
+
+    return () => subscriptions.forEach(unsub => unsub());
+  }, [ros]);
+
+  const renderMotorInfo = (label: string, data: MotorStatus | null) => {
+    if (!data) return <div>{label}: waiting for data...</div>;
+    return (
+      <div>
+        <strong>{label}</strong><br />
+        Velocity: {data.velocity.toFixed(2)} m/s<br />
+        Temp: {data.temperature.toFixed(1)} °C<br />
+        Current: {data.output_current.toFixed(2)} A
+        Bus_voltage: {data.bus_voltage.toFixed(2)} V<br />
+      </div>
+    );
+  };
+
   return (
     <div className="orientation-panel">
       <h3>UGV Orientation</h3>
-      <div className="viewport" ref={containerRef} />
+      <div className="viewport" ref={containerRef}>
+        <div className="motor-stats top-left">{renderMotorInfo('Front Left', motorStats.fl)}</div>
+        <div className="motor-stats top-right">{renderMotorInfo('Front Right', motorStats.fr)}</div>
+        <div className="motor-stats bottom-left">{renderMotorInfo('Rear Left', motorStats.rl)}</div>
+        <div className="motor-stats bottom-right">{renderMotorInfo('Rear Right', motorStats.rr)}</div>
+      </div>
+
       <style jsx>{`
         .orientation-panel {
           background: #1e1e1e;
@@ -124,18 +197,30 @@ const OrientationDisplayPanel: React.FC = () => {
           border-bottom: 1px solid #444;
           padding-bottom: 0.5rem;
         }
+        .viewport {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          overflow: hidden;
+        }
         canvas {
           display: block;
           max-width: 100%;
           max-height: 100%;
         }
-        .viewport {
-          width: 100%;
-          height: 100%;
-          display: block;
-          position: relative;
-          overflow: hidden;
+        .motor-stats {
+          position: absolute;
+          background: rgba(30, 30, 30, 0.85);
+          padding: 0.5rem;
+          font-size: 0.8rem;
+          border-radius: 0.5rem;
+          color: #fff;
+          line-height: 1.3;
         }
+        .top-left { top: 1rem; left: 1rem; }
+        .top-right { top: 1rem; right: 1rem; text-align: right; }
+        .bottom-left { bottom: 1rem; left: 1rem; }
+        .bottom-right { bottom: 1rem; right: 1rem; text-align: right; }
       `}</style>
     </div>
   );
