@@ -91,7 +91,11 @@ const OrientationDisplayPanel: React.FC = () => {
 
     const handleIMU = (msg: any) => {
       const { x, y, z, w } = msg.orientation;
-      cubeRef.current!.quaternion.set(x, y, z, w);
+      const newQuat = new THREE.Quaternion(-y, z, -x, w).normalize();
+      const euler = new THREE.Euler().setFromQuaternion(newQuat, 'YXZ');
+      euler.y = 0;
+      const rollPitchQuat = new THREE.Quaternion().setFromEuler(euler);
+      cubeRef.current!.quaternion.copy(rollPitchQuat);
     };
 
     imuTopic.subscribe(handleIMU);
