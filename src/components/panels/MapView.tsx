@@ -20,13 +20,13 @@ const MapView: React.FC = () => {
 
   return (
     <MapContainer
-      center={[45.258668232508136, -93.39358681856504]} // check this out on google maps, you wont be displeased
-      zoom={13}
+      center={[45.42605, -75.65203]} 
+      zoom={15}
       style={{ height: '100%', width: '100%' }}
     >
       {/* TODO: need to make this run offline*/}
       <TileLayer
-        url="http://localhost:3650/api/maps/streets/{z}/{x}/{y}.jpg" // For tiles (doesn't work): http://localhost:3650/api/tiles/FullOttawa/{z}/{x}/{y}.jpg
+        url="http://localhost:3650/api/tiles/FullOttawa/{z}/{x}/{y}"
         attribution="&copy; Maptiler server"
       />
       <MapInteractionHandler />
