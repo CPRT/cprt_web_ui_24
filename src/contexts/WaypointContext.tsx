@@ -1,5 +1,5 @@
 'use client';
-// did i mention i hate react?
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export type LatLngTuple = [number, number];
