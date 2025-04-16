@@ -123,17 +123,17 @@ const OrientationDisplayPanel: React.FC = () => {
     if (!ros) return;
 
     const motors = {
-      fl: '/motor_fl/status',
-      fr: '/motor_fr/status',
-      rl: '/motor_rl/status',
-      rr: '/motor_rr/status',
+      fl: '/frontLeft/status',
+      fr: '/frontRight/status',
+      rl: '/backLeft/status',
+      rr: '/backRight/status',
     };
 
     const subscriptions = Object.entries(motors).map(([key, topicName]) => {
       const topic = new ROSLIB.Topic({
         ros,
         name: topicName,
-        messageType: 'your_msgs/MotorStatus',
+        messageType: 'ros_phoenix/msg/MotorStatus',
         throttle_rate: 100,
       });
 
