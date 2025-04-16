@@ -14,8 +14,9 @@ import MapView from './MapView';
 import WaypointList from './WaypointList';
 import SystemTelemetryPanel from './SystemTelemetryPanel';
 import OrientationDisplayPanel from './OrientationDisplayPanel';
+import GoalSetterPanel from './GoalSetterPanel';
 
-type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'orientationDisplay';
+type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'orientationDisplay' | 'goalSetter';
 
 const MosaicDashboard: React.FC = () => {
   // TODO: paramaterize layout for custom layout configs
@@ -26,7 +27,12 @@ const MosaicDashboard: React.FC = () => {
       first: 'mapView',
       second: {
         direction: 'row',
-        first: 'webrtcStream',
+        first: {
+          direction: 'row',
+          first: 'goalSetter',
+          second: 'webrtcStream',
+          splitPercentage: 50,
+        },
         second: 'orientationDisplay',
         splitPercentage: 50,
       },
@@ -84,6 +90,12 @@ const MosaicDashboard: React.FC = () => {
         return (
           <MosaicWindow<MosaicKey> title="Rover Orientation" path={path}>
             <OrientationDisplayPanel />
+          </MosaicWindow>
+        );
+      case 'goalSetter':
+        return (
+          <MosaicWindow<MosaicKey> title="Goal Setter" path={path}>
+            <GoalSetterPanel />
           </MosaicWindow>
         );
       default:
