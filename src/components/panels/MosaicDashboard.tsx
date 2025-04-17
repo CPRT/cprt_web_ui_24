@@ -13,8 +13,9 @@ import WebRTCClientPanel from './WebRTCClientPanel';
 import MapView from './MapView';
 import WaypointList from './WaypointList';
 import SystemTelemetryPanel from './SystemTelemetryPanel';
+import GasSensor from './GasSensor';
 
-type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream';
+type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'gasSensor';
 
 const MosaicDashboard: React.FC = () => {
   // TODO: paramaterize layout for custom layout configs
@@ -32,7 +33,12 @@ const MosaicDashboard: React.FC = () => {
       second: {
         direction: 'row',
         first: 'nodeManager',
-        second: 'waypointList',
+        second: {
+          direction: 'row',
+          first: 'waypointList',
+          second: 'gasSensor',  // Add your panel here
+          splitPercentage: 70,
+        },
         splitPercentage: 50,
       },
       splitPercentage: 40,
@@ -74,6 +80,13 @@ const MosaicDashboard: React.FC = () => {
             <SystemTelemetryPanel />
           </MosaicWindow>
         );
+      case 'gasSensor':
+          return (
+            <MosaicWindow<MosaicKey> title="Science" path={path}>
+              <GasSensor/>
+            </MosaicWindow>
+          );
+      
       default:
         return <div>Unknown tile</div>;
     }
