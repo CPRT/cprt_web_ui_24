@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import ROSLIB from 'roslib';
 
-export type ConnectionStatus = 'connected' | 'disconnected' | 'error';
+export type ConnectionStatus = 'connected' | 'disconnected' | 'connecting' | 'error';
 
 interface ROSContextType {
   ros: ROSLIB.Ros | null;
@@ -25,6 +25,7 @@ export const ROSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Already connected. Please disconnect first.');
       return;
     }
+    setConnectionStatus('connecting')
 
     const rosInstance = new ROSLIB.Ros({ url });
 
@@ -39,6 +40,7 @@ export const ROSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     rosInstance.on('close', () => {
+      setRos(null);
       console.log('ROS connection closed');
       setConnectionStatus('disconnected');
     });
