@@ -8,7 +8,7 @@ const GstWebRTCPage = dynamic(() => import("../../components/WebRTCClientPage"),
 export default function Video() {
   return (
     <Layout>
-      <GstWebRTCPage config={{mockMode: false, signalingUrl: "ws://localhost:8443"}} />
+      <GstWebRTCPage/>
     </Layout>
   );
 }

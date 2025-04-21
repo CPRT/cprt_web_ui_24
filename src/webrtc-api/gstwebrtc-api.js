@@ -362,6 +362,12 @@ export default class GstWebRTCAPI {
       }
     }
   }
+  setSignalingServerUrl(newUrl) {
+    if (this._config.signalingServerUrl !== newUrl) {
+      this._config.signalingServerUrl = newUrl;
+      this.connectChannel();
+    }
+  }
 }
 
 GstWebRTCAPI.SessionState = SessionState;
