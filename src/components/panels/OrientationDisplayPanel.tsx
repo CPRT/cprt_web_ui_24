@@ -156,14 +156,35 @@ const OrientationDisplayPanel: React.FC = () => {
     return () => subscriptions.forEach(unsub => unsub());
   }, [ros]);
 
+  const renderBar = (value: number, color: string, clamp: number) => {
+    const percentage = Math.min(Math.max(value / clamp, 0), 1) * 100;
+    return (
+      <div className="bar-wrapper" style={{
+        width: '70%',
+        height: '0.5rem',
+        backgroundColor: '#ccc',
+        borderRadius: '4px',
+        overflow: 'hidden',
+        margin: '0.2rem 0'
+      }}>
+        <div className="bar-fill" style={{
+          width: `${percentage}%`, 
+          backgroundColor: color,
+          height: '100%',
+          transition: 'width 0.25s ease'
+          }} />
+      </div>
+    );
+  };
+
   const renderMotorInfo = (label: string, data: MotorStatus | null) => {
     if (!data) return <div>{label}: waiting for data...</div>;
     return (
       <div>
         <strong>{label}</strong><br />
-        Velocity: {data.velocity.toFixed(2)} m/s<br />
+        Velocity: {renderBar(data.velocity, '#f00', 20)} {data.velocity.toFixed(2)} m/s
+        Current: {renderBar(data.output_current, '#ff0', 6)} {data.output_current.toFixed(2)} A
         Temp: {data.temperature.toFixed(1)} °C<br />
-        Current: {data.output_current.toFixed(2)} A
         Bus_voltage: {data.bus_voltage.toFixed(2)} V<br />
       </div>
     );
@@ -210,8 +231,9 @@ const OrientationDisplayPanel: React.FC = () => {
         }
         .motor-stats {
           position: absolute;
-          background: rgba(30, 30, 30, 0.85);
+          background: #1e1e1e;
           padding: 0.5rem;
+          display: grid;
           font-size: 0.8rem;
           border-radius: 0.5rem;
           color: #fff;
@@ -221,6 +243,20 @@ const OrientationDisplayPanel: React.FC = () => {
         .top-right { top: 1rem; right: 1rem; text-align: right; }
         .bottom-left { bottom: 1rem; left: 1rem; }
         .bottom-right { bottom: 1rem; right: 1rem; text-align: right; }
+
+        .bar-wrapper {
+          width: 100%;
+          height: 0.5rem;
+          background-color: #ccc;
+          border-radius: 4px;
+          overflow: hidden;
+          margin: 0.2rem 0;
+        }
+
+        .bar-fill {
+          height: 100%;
+          transition: width 0.3s ease;
+        }
       `}</style>
     </div>
   );

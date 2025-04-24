@@ -23,11 +23,11 @@ const MosaicDashboard: React.FC = () => {
     direction: 'row',
     first: {
       direction: 'column',
-      first: 'mapView',
+      first: 'orientationDisplay',
       second: {
         direction: 'row',
         first: 'webrtcStream',
-        second: 'orientationDisplay',
+        second: 'mapView',
         splitPercentage: 50,
       },
       splitPercentage: 50,
