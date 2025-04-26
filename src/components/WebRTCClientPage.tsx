@@ -27,7 +27,7 @@ interface WebRTCRosClientConfig {
   mockMode?: boolean;
 }
 
-interface VideoSource {
+export interface VideoSource {
   name: string;
   width: number;
   height: number;
@@ -36,9 +36,6 @@ interface VideoSource {
 }
 
 export interface VideoOutRequest {
-  height: number;
-  width: number;
-  framerate: number;
   num_sources: number;
   sources: VideoSource[];
 }

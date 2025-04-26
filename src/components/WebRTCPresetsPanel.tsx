@@ -22,9 +22,6 @@ const WebRTCPresetsPanel: React.FC<WebRTCPresetsPanelProps> = ({ onPresetSelect 
     {
       name: "Drive",
       preset: {
-        height: 600,
-        width: 900,
-        framerate: 30,
         num_sources: 1,
         sources: [{ name: "Drive", width: 100, height: 100, origin_x: 0, origin_y: 0 }],
       },
@@ -32,9 +29,6 @@ const WebRTCPresetsPanel: React.FC<WebRTCPresetsPanelProps> = ({ onPresetSelect 
     {
       name: "Test",
       preset: {
-        height: 480,
-        width: 640,
-        framerate: 30,
         num_sources: 1,
         sources: [{ name: "Test", width: 100, height: 100, origin_x: 0, origin_y: 0 }],
       },
