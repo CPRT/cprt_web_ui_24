@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import CameraSourceDropdown from "./CameraSourceDropdown";
 
 // Type Definitions
 interface VideoSource {
@@ -128,11 +129,8 @@ const WebRTCCustomPresetForm: React.FC<CustomPresetFormProps> = ({ onSubmit }) =
           <h3 style={{ flexBasis: "100%", margin: 0 }}>Source {index + 1}</h3>
           <label style={{ flex: "1 1 45%" }}>
             Name
-            <input
-              type="text"
-              value={source.name}
-              onChange={(e) => handleSourceChange(index, "name", e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", borderRadius: "0.25rem" }}
+            <CameraSourceDropdown
+              onChange={(source) => handleSourceChange(index, "name", source)}
             />
           </label>
           <label style={{ flex: "1 1 45%" }}>
