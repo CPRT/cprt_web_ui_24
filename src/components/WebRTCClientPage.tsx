@@ -1,83 +1,81 @@
 "use client";
 
-import '@/webrtc-api';
+import "@/webrtc-api";
 import React, { useEffect, useRef, useState } from "react";
-import ROSLIB from 'roslib';
-import { useROS } from '@/ros/ROSContext';
-import { init } from 'next/dist/compiled/webpack/webpack';
+import { createRoot } from "react-dom/client";
+import ROSLIB from "roslib";
+import WebRTCCustomPresetForm from "./WebRTCCustomPresetForm";
+import WebRTCSignalingConfig from "./WebRTCSignalingConfig";
+import WebRTCPresetsPanel from "./WebRTCPresetsPanel";
 
+import { useROS } from "@/ros/ROSContext";
+
+// Type Definitions
 interface IStreamHTMLElement extends HTMLElement {
-    _consumerSession?: any;
-}
-
-interface WebRTCRosClientConfig {
-    signalingUrl?: string;
-    // stunServers?: string[]; // tbh we dont need any stun servers, we arent traversing NAT
-    videoServiceName?: string;
-    videoServiceMessageType?: string;
-    defaultVideoRequest?: VideoOutRequest;
-    mockMode?: boolean;
-}
-
-interface GstWebRTCAPI{
-    createConsumerSession: (producerId: string) => any;
-    registerProducersListener: (listener: any) => void;
-    getAvailableProducers: () => any[];
+  _consumerSession?: any;
 }
 
 interface WebRTCClientPageProps {
-    config?: WebRTCRosClientConfig;
+  config?: WebRTCRosClientConfig;
+}
+
+interface WebRTCRosClientConfig {
+  signalingUrl?: string;
+  videoServiceName?: string;
+  videoServiceMessageType?: string;
+  mockMode?: boolean;
 }
 
 interface VideoSource {
-    name: string;
-    width: number;
-    height: number;
-    origin_x: number;
-    origin_y: number;
-}
-  
-interface VideoOutRequest {
-    height: number;
-    width: number;
-    framerate: number;
-    num_sources: number;
-    sources: VideoSource[];
-}
-  
-interface VideoOutResponse {
-    success: boolean;
+  name: string;
+  width: number;
+  height: number;
+  origin_x: number;
+  origin_y: number;
 }
 
+export interface VideoOutRequest {
+  height: number;
+  width: number;
+  framerate: number;
+  num_sources: number;
+  sources: VideoSource[];
+}
+
+interface VideoOutResponse {
+  success: boolean;
+}
+
+interface GstWebRTCAPI {
+  createConsumerSession: (producerId: string) => any;
+  registerProducersListener: (listener: any) => void;
+  setSignalingServerUrl: (url: string) => void;
+  getAvailableProducers: () => any[];
+}
+
+// Default Configuration
 const defaultConfig: WebRTCRosClientConfig = {
-  signalingUrl: 'ws://localhost:8080/signalling',
-  videoServiceName: 'rosapi/get_time',
-  videoServiceMessageType: 'interfaces/srv/VideoOut',
-  defaultVideoRequest: {
-    height: 480,
-    width: 640,
-    framerate: 30,
-    num_sources: 1,
-    sources: [
-      {
-        name: 'test',
-        width: 100,
-        height: 100,
-        origin_x: 0,
-        origin_y: 0,
-      },
-    ],
-  },
+  signalingUrl: "ws://localhost:8443",
+  videoServiceName: "/start_video",
+  videoServiceMessageType: "interfaces/srv/VideoOut",
   mockMode: false,
 };
 
+// UI Styles
+const buttonStyle: React.CSSProperties = {
+  fontSize: "1.5rem",
+  width: "100%",
+  height: "100%",
+};
+
+// Main Component
 const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
-    config = defaultConfig,
+  config = defaultConfig,
 }) => {
   const apiRef = useRef<GstWebRTCAPI | null>(null);
   const { ros, connectionStatus: rosStatus } = useROS();
+  const [signalingUrl, setSignalingUrl] = useState(config.signalingUrl || defaultConfig.signalingUrl);
 
-  // create listener instance for webRTC API
 
   const initRemoteStreams = (api: GstWebRTCAPI) => {
     const remoteStreamsElement = document.getElementById("remote-streams");
@@ -85,38 +83,43 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
     const listener = {
       producerAdded: (producer: any) => {
         const producerId = producer.id;
-        if (!document.getElementById(producerId) && remoteStreamsElement) {
-          remoteStreamsElement.insertAdjacentHTML(
-            "beforeend",
-            `<li id="${producerId}">
-              <div class="video" style="display: flex; flex-direction: row;">
-                  <video style="width: 100%;"autoplay playsinline muted></video>
-              </div>
-            </li>`
-          );
+        if (document.getElementById(producerId) || !remoteStreamsElement)
+          return;
 
-          const entryElement = document.getElementById(producerId) as IStreamHTMLElement;
-          if (!entryElement) return;
+        remoteStreamsElement.insertAdjacentHTML(
+          "beforeend",
+          `<li id="${producerId}">
+            <div class="video" style="display: flex; flex-direction: row;">
+              <video style="width: 100%; height: 85vh;" autoplay playsinline muted></video>
+            </div>
+          </li>`,
+        );
 
-          const videoElement = entryElement.querySelector("video") as HTMLVideoElement;
+        const entryElement = document.getElementById(
+          producerId,
+        ) as IStreamHTMLElement;
+        const videoElement = entryElement.querySelector(
+          "video",
+        ) as HTMLVideoElement;
 
-          let session = api.createConsumerSession(producerId);
-          entryElement._consumerSession = session;
+        const session = api.createConsumerSession(producerId);
+        entryElement._consumerSession = session;
 
-          session.addEventListener("streamsChanged", () => {
-            const streams = session.streams;
-            if (streams.length > 0) {
-              videoElement.srcObject = streams[0];
-              videoElement.play().catch((err) => console.warn("Autoplay failed:", err));
-            }
-          });
+        session.addEventListener("streamsChanged", () => {
+          const streams = session.streams;
+          if (streams.length > 0) {
+            videoElement.srcObject = streams[0];
+            videoElement.play().catch((err) => console.warn("Autoplay failed:", err));
+          }
+        });
 
-          session.connect();
-        }
+        session.connect();
       },
 
       producerRemoved: (producer: any) => {
-        const element = document.getElementById(producer.id) as IStreamHTMLElement;
+        const element = document.getElementById(
+          producer.id,
+        ) as IStreamHTMLElement;
         if (element) {
           element._consumerSession?.close();
           element.remove();
@@ -128,54 +131,14 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
     api.getAvailableProducers().forEach(listener.producerAdded);
   };
 
-  // WebRTC API initialization
-  const gstWebRTCConfig = {
-    signalingServerUrl: `${config.signalingUrl}`,
-  };
-
-  const GstWebRTCAPI = (window as any).GstWebRTCAPI;
-  const api: GstWebRTCAPI = new GstWebRTCAPI(gstWebRTCConfig);
-  apiRef.current = api;
-
   const newPreset = (presetName: string, camRequest: VideoOutRequest) => {
-
     if (config.mockMode) {
-      console.log('Mock mode enabled, ros service requests not available, ya goof!');
+      console.log("Mock mode enabled. ROS service requests disabled.");
       return;
     }
 
-    if (!ros || rosStatus !== 'connected') {
-      console.error('Not connected to ROS');
-      return;
-    }
-
-    const startVideoSrv = new ROSLIB.Service({
-      ros,
-      name: config.videoServiceName!,
-      serviceType: config.videoServiceMessageType!,
-    });
-
-    const request: VideoOutRequest = camRequest;
-    startVideoSrv.callService(new ROSLIB.ServiceRequest(request), (response: VideoOutResponse) => {
-      if (response.success) {
-        console.log(`Video stream set to new preset ${presetName}`);
-      } else {
-        console.error(`Failed to change video preset to ${presetName}`);
-      }
-    });
-  }
-
-  // Ros connection and services
-  const startVideoService = () => {
-
-    if (config.mockMode) {
-      console.log('Mock mode enabled, bypassing ROS2 services and what not');
-      initRemoteStreams(api);
-      return;
-    }
-
-    if (!ros || rosStatus !== 'connected') {
-      console.error('Not connected to ROS');
+    if (!ros || rosStatus !== "connected") {
+      console.error("Not connected to ROS");
       return;
     }
 
@@ -185,139 +148,44 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
       serviceType: config.videoServiceMessageType || defaultConfig.videoServiceMessageType!,
     });
 
-    const request: VideoOutRequest = config.defaultVideoRequest || defaultConfig.defaultVideoRequest!;
-    startVideoSrv.callService(new ROSLIB.ServiceRequest(request), (response: VideoOutResponse) => {
-      if (response.success) {
-        console.log('Video stream started successfully on rover.');
-        initRemoteStreams(api);
-      } else {
-        console.error('Failed to start video stream on rover.');
-      }
-    });
+    startVideoSrv.callService(
+      new ROSLIB.ServiceRequest(camRequest),
+      (response: VideoOutResponse) => {
+        console[response.success ? "log" : "error"](
+          response.success
+            ? `Video stream set to new preset ${presetName}`
+            : `Failed to change video preset to ${presetName}`,
+        );
+      },
+    );
   };
 
-  const [customPreset, setCustomPreset] = useState('');
-
-  const handleCustomFieldChange = (e: any) => {
-    setCustomPreset(e.target.value);
-  };
-
-  const handlePresetButtonClick = () => {
-    try {
-      const parsedPreset = JSON.parse(customPreset);
-
-      newPreset("test", parsedPreset);
-    } catch (error) {
-      alert('Invalid JSON. Please correct the input.');
+  useEffect(() => {
+    if (apiRef.current && signalingUrl) {
+      apiRef.current.setSignalingServerUrl(signalingUrl);
+    } else {
+      const GstWebRTCAPI = (window as any).GstWebRTCAPI;
+      const api: GstWebRTCAPI = new GstWebRTCAPI({
+        signalingServerUrl: signalingUrl,
+      });
+      apiRef.current = api;
+      initRemoteStreams(api);
     }
-  };
+  }, [signalingUrl]);
 
+  // Render
   return (
-    <div
-      style={{}}>
+    <div>
       <ul id="remote-streams"></ul>
-      <div style={{width: '100%', height: '10vh', display: 'flex'}}>
-        <button 
-          style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
-          onClick= {() => newPreset("test",
-          {
-            height: 480,
-            width: 640,
-            framerate: 30,
-            num_sources: 1,
-            sources: [
-              {
-                name: 'test',
-                width: 100,
-                height: 100,
-                origin_x: 0,
-                origin_y: 0,
-              },
-            ],
-          })}
-        >Preset 1</button>
-        <button 
-          style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
-          onClick= {() => newPreset("test",
-            {
-              height: 480,
-              width: 640,
-              framerate: 30,
-              num_sources: 1,
-              sources: [
-                {
-                  name: 'test',
-                  width: 100,
-                  height: 100,
-                  origin_x: 0,
-                  origin_y: 0,
-                },
-              ],
-            })}
-        >Preset 2</button>
-        <button 
-          style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
-          onClick= {() => newPreset("test",
-            {
-              height: 480,
-              width: 640,
-              framerate: 30,
-              num_sources: 1,
-              sources: [
-                {
-                  name: 'test',
-                  width: 100,
-                  height: 100,
-                  origin_x: 0,
-                  origin_y: 0,
-                },
-              ],
-            })}
-            >Preset 3</button>
-        <button 
-          style={{fontSize: '1.5rem', width:'100%', height:'100%'}}
-          onClick= {() => newPreset("test",
-          {
-            height: 480,
-            width: 640,
-            framerate: 30,
-            num_sources: 1,
-            sources: [
-              {
-                name: 'test',
-                width: 100,
-                height: 100,
-                origin_x: 0,
-                origin_y: 0,
-              },
-            ],
-          })}
-        >Preset 4</button>
-        <button 
-          style={{fontSize: '1.5rem', width: '100%', height: '100%'}}
-          onClick={handlePresetButtonClick}
-          // onClick={() => console.log(customPreset)}
-        >
-          Custom Field
-        </button>
+      <div style={{ width: "100%", height: "10vh", display: "flex" }}>
+        <WebRTCPresetsPanel onPresetSelect={newPreset} />
       </div>
-      <div>
-        <label htmlFor="customField">Enter custom JSON preset:</label>
-        <textarea
-          id="customField"
-          value={customPreset}
-          onChange={handleCustomFieldChange}
-          rows={10}
-          cols={50}
-          placeholder='"height": 480, &#10;"width": 640, &#10;"framerate": 30, &#10;"num_sources": 1, &#10;"sources": [{&#10;"name": "test", &#10;"width": 100, &#10;"height": 100&#10;}]'
-        ></textarea>
+      <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center" }}>
+        <WebRTCSignalingConfig onUrlChange={setSignalingUrl} />
       </div>
-      
-      <div>
-        <button onClick={startVideoService}>Start Video Stream</button>
-        {/* <button onClick={stopVideoStream}>Stop Video Stream</button> */}
+      <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center" }}>
+        <WebRTCCustomPresetForm onSubmit={(preset) => newPreset("Custom", preset)} />
       </div>
-      
     </div>
   );
 };

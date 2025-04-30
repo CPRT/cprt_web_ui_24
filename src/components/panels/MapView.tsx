@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import L from 'leaflet';
 import { useWaypoints } from '@/contexts/WaypointContext';
 import BreadcrumbTrail from '../BreadCrumbTrail';
+import WaypointCreatorWindow from '../WaypointCreatorWindow';
 import MapInteractionHandler from '../MapInteractionHandler';
 
 const getCustomIcon = (color: string) =>
@@ -52,7 +53,20 @@ const MapView: React.FC = () => {
       {waypoints.length > 1 && (
         <Polyline positions={waypoints.map((wp) => wp.coordinate)} color="#4a90e2" />
       )}
-      <BreadcrumbTrail />
+      <div
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          zIndex: 1000,
+          borderRadius: '8px',
+          color: '#fff',
+          fontSize: '0.9rem',
+          maxWidth: '300px',
+        }}>
+        <BreadcrumbTrail />
+        <WaypointCreatorWindow />
+      </div>
     </MapContainer>
   );
 };

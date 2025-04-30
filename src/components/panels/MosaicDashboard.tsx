@@ -14,8 +14,10 @@ import MapView from './MapView';
 import WaypointList from './WaypointList';
 import SystemTelemetryPanel from './SystemTelemetryPanel';
 import OrientationDisplayPanel from './OrientationDisplayPanel';
+import GoalSetterPanel from './GoalSetterPanel';
+import GasSensor from './GasSensor';
 
-type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'orientationDisplay';
+type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'gasSensor' | 'orientationDisplay' | 'goalSetter';
 
 const MosaicDashboard: React.FC = () => {
   // TODO: paramaterize layout for custom layout configs
@@ -23,11 +25,11 @@ const MosaicDashboard: React.FC = () => {
     direction: 'row',
     first: {
       direction: 'column',
-      first: 'orientationDisplay',
+      first: 'mapView',
       second: {
         direction: 'row',
-        first: 'webrtcStream',
-        second: 'mapView',
+        first: 'goalSetter',
+        second: 'orientationDisplay',
         splitPercentage: 50,
       },
       splitPercentage: 50,
@@ -38,7 +40,12 @@ const MosaicDashboard: React.FC = () => {
       second: {
         direction: 'row',
         first: 'nodeManager',
-        second: 'waypointList',
+        second: {
+          direction: 'row',
+          first: 'waypointList',
+          second: 'gasSensor',  // Add your panel here
+          splitPercentage: 70,
+        },
         splitPercentage: 50,
       },
       splitPercentage: 40,
@@ -84,6 +91,19 @@ const MosaicDashboard: React.FC = () => {
         return (
           <MosaicWindow<MosaicKey> title="Rover Orientation" path={path}>
             <OrientationDisplayPanel />
+          </MosaicWindow>
+        );
+      case 'gasSensor':
+          return (
+            <MosaicWindow<MosaicKey> title="Science" path={path}>
+              <GasSensor/>
+            </MosaicWindow>
+          );
+      
+      case 'goalSetter':
+        return (
+          <MosaicWindow<MosaicKey> title="Goal Setter" path={path}>
+            <GoalSetterPanel />
           </MosaicWindow>
         );
       default:

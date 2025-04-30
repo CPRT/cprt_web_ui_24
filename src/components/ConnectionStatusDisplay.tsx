@@ -1,18 +1,31 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 import { useROS } from '@/ros/ROSContext';
 
 const ConnectionStatusDisplay: React.FC = () => {
   const { connectionStatus, connect, disconnect } = useROS();
-  // default url is probably this
   const [url, setUrl] = useState('ws://localhost:9090');
 
+  // Load url from cookie on mount
+  useEffect(() => {
+    const savedUrl = Cookies.get('rosbridge_url')?.trim();
+    if (savedUrl) {
+      setUrl(savedUrl);
+      connect(savedUrl);
+    }
+  }, []);
 
-  // wowow chossing colors based on connection status
+  useEffect(() => {
+    Cookies.set('rosbridge_url', url, { expires: 1 });
+  }, [url]);
+
   const getStatusColor = () => {
     switch (connectionStatus) {
       case 'connected':
         return 'green';
+      case 'connecting':
+        return 'yellow';
       case 'error':
         return 'orange';
       case 'disconnected':
@@ -40,12 +53,14 @@ const ConnectionStatusDisplay: React.FC = () => {
         placeholder="Enter ROS IP (ws://...)"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') handleConnect();
+        }}
       />
       <button onClick={handleConnect}>Connect</button>
       {connectionStatus === 'connected' && (
         <button onClick={handleDisconnect}>Disconnect</button>
       )}
-      {/*Ty chat gpt once again for styling this*/}
       <style jsx>{`
         .connection-status {
           display: flex;
@@ -83,5 +98,3 @@ const ConnectionStatusDisplay: React.FC = () => {
 };
 
 export default ConnectionStatusDisplay;
-
-

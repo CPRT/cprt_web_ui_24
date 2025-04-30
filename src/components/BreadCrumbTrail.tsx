@@ -108,10 +108,6 @@ const BreadcrumbTrail: React.FC = () => {
 
       <div
         style={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          zIndex: 1000,
           backgroundColor: 'rgba(0,0,0,0.7)',
           padding: '1rem',
           borderRadius: '8px',
