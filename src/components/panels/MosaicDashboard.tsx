@@ -14,9 +14,10 @@ import MapView from './MapView';
 import WaypointList from './WaypointList';
 import SystemTelemetryPanel from './SystemTelemetryPanel';
 import OrientationDisplayPanel from './OrientationDisplayPanel';
+import GoalSetterPanel from './GoalSetterPanel';
 import GasSensor from './GasSensor';
 
-type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'gasSensor' | 'orientationDisplay';
+type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'gasSensor' | 'orientationDisplay' | 'goalSetter';
 
 const MosaicDashboard: React.FC = () => {
   // TODO: paramaterize layout for custom layout configs
@@ -27,7 +28,12 @@ const MosaicDashboard: React.FC = () => {
       first: 'mapView',
       second: {
         direction: 'row',
-        first: 'webrtcStream',
+        first: {
+          direction: 'row',
+          first: 'goalSetter',
+          second: 'webrtcStream',
+          splitPercentage: 50,
+        },
         second: 'orientationDisplay',
         splitPercentage: 50,
       },
@@ -99,6 +105,12 @@ const MosaicDashboard: React.FC = () => {
             </MosaicWindow>
           );
       
+      case 'goalSetter':
+        return (
+          <MosaicWindow<MosaicKey> title="Goal Setter" path={path}>
+            <GoalSetterPanel />
+          </MosaicWindow>
+        );
       default:
         return <div>Unknown tile</div>;
     }
