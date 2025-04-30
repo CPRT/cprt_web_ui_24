@@ -156,14 +156,35 @@ const OrientationDisplayPanel: React.FC = () => {
     return () => subscriptions.forEach(unsub => unsub());
   }, [ros]);
 
+  const renderBar = (value: number, color: string, clamp: number) => {
+    const percentage = Math.min(Math.max(value / clamp, 0), 1) * 100;
+    return (
+      <div className="bar-wrapper" style={{
+        width: '50px',
+        height: '0.5rem',
+        backgroundColor: '#ccc',
+        borderRadius: '4px',
+        overflow: 'hidden',
+        margin: '0.2rem 5px 0 0'
+      }}>
+        <div className="bar-fill" style={{
+          width: `${percentage}%`, 
+          backgroundColor: color,
+          height: '100%',
+          transition: 'width 0.25s ease'
+          }} />
+      </div>
+    );
+  };
+
   const renderMotorInfo = (label: string, data: MotorStatus | null) => {
     if (!data) return <div>{label}: waiting for data...</div>;
     return (
       <div>
         <strong>{label}</strong><br />
-        Velocity: {data.velocity.toFixed(2)} m/s<br />
+        <div style={{display: 'flex'}} >{data.velocity < 0 ? renderBar(Math.abs(data.velocity), '#f00', 20) : renderBar(data.velocity, '#0f0', 20)} {data.velocity.toFixed(2)} m/s </div>
+        <div style={{display: 'flex'}} >{renderBar(data.output_current, '#ff0', 6)} {data.output_current.toFixed(2)} A </div>
         Temp: {data.temperature.toFixed(1)} °C<br />
-        Current: {data.output_current.toFixed(2)} A
         Bus_voltage: {data.bus_voltage.toFixed(2)} V<br />
       </div>
     );
@@ -210,8 +231,9 @@ const OrientationDisplayPanel: React.FC = () => {
         }
         .motor-stats {
           position: absolute;
-          background: rgba(30, 30, 30, 0.85);
+          background: #1e1e1e;
           padding: 0.5rem;
+          display: grid;
           font-size: 0.8rem;
           border-radius: 0.5rem;
           color: #fff;
