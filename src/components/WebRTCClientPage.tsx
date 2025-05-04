@@ -7,6 +7,7 @@ import ROSLIB from "roslib";
 import WebRTCCustomPresetForm from "./WebRTCCustomPresetForm";
 import WebRTCSignalingConfig from "./WebRTCSignalingConfig";
 import WebRTCPresetsPanel from "./WebRTCPresetsPanel";
+import VideoCapture from "./VideoCapture";
 
 import { useROS } from "@/ros/ROSContext";
 
@@ -26,7 +27,7 @@ interface WebRTCRosClientConfig {
   mockMode?: boolean;
 }
 
-interface VideoSource {
+export interface VideoSource {
   name: string;
   width: number;
   height: number;
@@ -35,9 +36,6 @@ interface VideoSource {
 }
 
 export interface VideoOutRequest {
-  height: number;
-  width: number;
-  framerate: number;
   num_sources: number;
   sources: VideoSource[];
 }
@@ -132,6 +130,7 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
   };
 
   const newPreset = (presetName: string, camRequest: VideoOutRequest) => {
+    console.log(`Setting new video preset: ${presetName}`, camRequest);
     if (config.mockMode) {
       console.log("Mock mode enabled. ROS service requests disabled.");
       return;
@@ -183,8 +182,21 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
       <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center" }}>
         <WebRTCSignalingConfig onUrlChange={setSignalingUrl} />
       </div>
-      <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center" }}>
-        <WebRTCCustomPresetForm onSubmit={(preset) => newPreset("Custom", preset)} />
+      <div
+        style={{
+          marginTop: "2rem",
+          display: "flex",
+          justifyContent: "center",
+          gap: "2rem",
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ flex: "1 1 300px", maxWidth: "500px" }}>
+          <VideoCapture />
+        </div>
+        <div style={{ flex: "1 1 300px", maxWidth: "600px" }}>
+          <WebRTCCustomPresetForm onSubmit={(preset) => newPreset("Custom", preset)} />
+        </div>
       </div>
     </div>
   );

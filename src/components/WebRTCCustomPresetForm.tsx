@@ -1,32 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+import CameraSourceDropdown from "./CameraSourceDropdown";
+import { VideoOutRequest, VideoSource } from "./WebRTCClientPage";
 
-// Type Definitions
-interface VideoSource {
-  name: string;
-  width: number;
-  height: number;
-  origin_x: number;
-  origin_y: number;
-}
-
-interface VideoOutRequest {
-  height: number;
-  width: number;
-  framerate: number;
-  num_sources: number;
-  sources: VideoSource[];
-}
 
 interface CustomPresetFormProps {
   onSubmit: (preset: VideoOutRequest) => void;
 }
 
 const WebRTCCustomPresetForm: React.FC<CustomPresetFormProps> = ({ onSubmit }) => {
-  const [height, setHeight] = useState(480);
-  const [width, setWidth] = useState(640);
-  const [framerate, setFramerate] = useState(30);
   const [sources, setSources] = useState<VideoSource[]>([
     { name: "Source1", width: 100, height: 100, origin_x: 0, origin_y: 0 },
   ]);
@@ -56,9 +39,6 @@ const WebRTCCustomPresetForm: React.FC<CustomPresetFormProps> = ({ onSubmit }) =
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const preset: VideoOutRequest = {
-      height,
-      width,
-      framerate,
       num_sources: sources.length,
       sources,
     };
@@ -82,36 +62,6 @@ const WebRTCCustomPresetForm: React.FC<CustomPresetFormProps> = ({ onSubmit }) =
     >
       <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Custom Preset</h2>
 
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <label style={{ flex: 1 }}>
-          Width
-          <input
-            type="number"
-            value={width}
-            onChange={(e) => setWidth(Number(e.target.value))}
-            style={{ width: "100%", padding: "0.5rem", borderRadius: "0.25rem" }}
-          />
-        </label>
-        <label style={{ flex: 1 }}>
-          Height
-          <input
-            type="number"
-            value={height}
-            onChange={(e) => setHeight(Number(e.target.value))}
-            style={{ width: "100%", padding: "0.5rem", borderRadius: "0.25rem" }}
-          />
-        </label>
-        <label style={{ flex: 1 }}>
-          FPS
-          <input
-            type="number"
-            value={framerate}
-            onChange={(e) => setFramerate(Number(e.target.value))}
-            style={{ width: "100%", padding: "0.5rem", borderRadius: "0.25rem" }}
-          />
-        </label>
-      </div>
-
       {sources.map((source, index) => (
         <div
           key={index}
@@ -128,11 +78,8 @@ const WebRTCCustomPresetForm: React.FC<CustomPresetFormProps> = ({ onSubmit }) =
           <h3 style={{ flexBasis: "100%", margin: 0 }}>Source {index + 1}</h3>
           <label style={{ flex: "1 1 45%" }}>
             Name
-            <input
-              type="text"
-              value={source.name}
-              onChange={(e) => handleSourceChange(index, "name", e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", borderRadius: "0.25rem" }}
+            <CameraSourceDropdown
+              onChange={(source) => handleSourceChange(index, "name", source)}
             />
           </label>
           <label style={{ flex: "1 1 45%" }}>
