@@ -185,15 +185,26 @@ const OrientationDisplayPanel: React.FC = () => {
         <div style={{display: 'flex'}} >{data.velocity < 0 ? renderBar(Math.abs(data.velocity), '#f00', 20) : renderBar(data.velocity, '#0f0', 20)} {data.velocity.toFixed(2)} m/s </div>
         <div style={{display: 'flex'}} >{renderBar(data.output_current, '#ff0', 6)} {data.output_current.toFixed(2)} A </div>
         Temp: {data.temperature.toFixed(1)} °C<br />
-        Bus_voltage: {data.bus_voltage.toFixed(2)} V<br />
       </div>
     );
   };
 
+  const getBusVoltage = () => {
+    const voltages = Object.values(motorStats)
+      .filter((stat): stat is MotorStatus => stat !== null)
+      .map(stat => stat.bus_voltage);
+  
+    if (voltages.length === 0) return null;
+  
+    const avg = voltages.reduce((sum, v) => sum + v, 0) / voltages.length;
+    return avg.toFixed(2);
+  };
+  
   return (
     <div className="orientation-panel">
       <h3>UGV Orientation</h3>
       <div className="viewport" ref={containerRef}>
+      <div className="bus-voltage">{getBusVoltage() ? `Bus Voltage: ${getBusVoltage()} V` : 'Waiting for voltage...'}</div>
         <div className="motor-stats top-left">{renderMotorInfo('Front Left', motorStats.fl)}</div>
         <div className="motor-stats top-right">{renderMotorInfo('Front Right', motorStats.fr)}</div>
         <div className="motor-stats bottom-left">{renderMotorInfo('Rear Left', motorStats.rl)}</div>
@@ -228,6 +239,17 @@ const OrientationDisplayPanel: React.FC = () => {
           display: block;
           max-width: 100%;
           max-height: 100%;
+        }
+        .bus-voltage {
+          position: absolute;
+          top: 0.5rem;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #1e1e1e;
+          padding: 0.3rem 0.6rem;
+          border-radius: 0.5rem;
+          font-size: 0.8rem;
+          color: #fff;
         }
         .motor-stats {
           position: absolute;
