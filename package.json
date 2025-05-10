@@ -24,7 +24,6 @@
     "recharts": "^2.15.1",
     "roslib": "^1.4.1",
     "three": "^0.173.0",
-    "urdf-loader": "^0.12.4",
     "webrtc-adapter": "^9.0.1"
   },
   "devDependencies": {
