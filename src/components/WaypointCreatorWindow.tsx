@@ -55,7 +55,11 @@ const WaypointCreatorWindow: React.FC = () => {
             </div>
             <button 
                 disabled={lat === null || long === null}
-                onClick={() => addWaypoint([long, lat])}
+                onClick={() => {
+                    if (lat !== null && long !== null) {
+                        addWaypoint([long, lat]);
+                    }
+                }}
                 style={{
                     backgroundColor: '#0070f3',
                     color: 'white',
