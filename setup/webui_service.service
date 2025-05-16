@@ -1,0 +1,12 @@
+[Unit]
+Description = Start ROS 2 Web UI
+After = network.target
+
+[Service]
+Type=simple
+User=%i
+ExecStart=%i
+
+
+[Install]
+WantedBy = multi-user.target
