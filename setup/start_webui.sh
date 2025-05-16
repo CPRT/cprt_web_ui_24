@@ -24,5 +24,5 @@ if [ ! -e "../node_modules" ]; then
     npm i --legacy-peer-deps
 fi
 echo "node modules installed, starting web ui server"
-npm run open
+npm run dev
 
