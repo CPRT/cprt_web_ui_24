@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "BOB ROS2",
-  description: "DEEZNUTZ?",
+  description: "Carleton Planetary Robotics Team's ROS2 Web Interface",
 };
 
 export default function RootLayout({

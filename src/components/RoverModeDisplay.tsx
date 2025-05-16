@@ -5,9 +5,12 @@ import ROSLIB from 'roslib';
 
 
 const modeColors: { [key: string]: string } = {
-  teleOP: '#0070f3',       // blue ballz
-  Autonomous: '#28a745',   // green shrek
-  Idle: '#6c757d',         // grey like gandalf
+  TeleOP: '#0070f3',       // blue
+  Autonomous: '#28a745',   // green
+  Manual: '#dc3545',       // red
+  IK: '#ffc107',           // yellow
+  Science: '#17a2b8',      // cyan
+  Idle: '#6c757d',         // grey
 };
 
 const RoverModeDisplay: React.FC = () => {
@@ -20,7 +23,7 @@ const RoverModeDisplay: React.FC = () => {
     if (!ros) return;
     const modeTopic = new ROSLIB.Topic({
       ros,
-      name: '/rover_mode', // TODO: might change
+      name: '/rover_mode',
       messageType: 'std_msgs/String',
     });
     const handleModeMessage = (message: any) => {
@@ -34,7 +37,7 @@ const RoverModeDisplay: React.FC = () => {
     return () => modeTopic.unsubscribe(handleModeMessage);
   }, [ros, currentMode]);
 
-  // update every one second, also i hate react
+  // update every one second
   useEffect(() => {
     const interval = setInterval(() => {
       setElapsed(Math.floor((Date.now() - modeStartTime) / 1000));
