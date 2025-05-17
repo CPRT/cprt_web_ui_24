@@ -1,0 +1,3 @@
+[submodule "src/tiling-server"]
+	path = src/tiling-server
+	url = https://github.com/CPRT/tiling-server.git

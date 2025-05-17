@@ -16,19 +16,22 @@ const getCustomIcon = (color: string) =>
     iconAnchor: [10, 10],
   });
 
-const MapView: React.FC = () => {
+type MapViewProps = {
+  offline: boolean;
+};
+
+const MapView: React.FC<MapViewProps> = ({offline}) => {
   const { waypoints } = useWaypoints();
 
   return (
     <MapContainer
-      center={[45.258668232508136, -93.39358681856504]} // check this out on google maps, you wont be displeased
-      zoom={13}
+      center={[45.387295, -75.700974]} 
+      zoom={0}
       style={{ height: '100%', width: '100%' }}
     >
-      {/* TODO: need to make this run offline*/}
       <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
+        url={offline? "http://localhost:80/{z}/{x}/{y}.png" : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+        attribution="&copy; Maptiler server"
       />
       <MapInteractionHandler />
       {waypoints.map((wp, index) => (
