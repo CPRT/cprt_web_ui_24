@@ -16,8 +16,9 @@ import SystemTelemetryPanel from './SystemTelemetryPanel';
 import OrientationDisplayPanel from './OrientationDisplayPanel';
 import GoalSetterPanel from './GoalSetterPanel';
 import GasSensor from './GasSensor';
+import NetworkHealthTelemetryPanel from './NetworkHealthTelemetryPanel';
 
-type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'gasSensor' | 'orientationDisplay' | 'goalSetter';
+type MosaicKey = 'mapView' | 'rosMonitor' | 'waypointList' | 'nodeManager' | 'webrtcStream' | 'gasSensor' | 'orientationDisplay' | 'goalSetter' | 'networkHealthMonitor';
 
 const MosaicDashboard: React.FC = () => {
   // TODO: paramaterize layout for custom layout configs
@@ -36,7 +37,12 @@ const MosaicDashboard: React.FC = () => {
     },
     second: {
       direction: 'column',
-      first: 'rosMonitor',
+      first: {
+        direction: 'row',
+        first: 'rosMonitor',
+        second: 'networkHealthMonitor',
+        splitPercentage: 60
+      },
       second: {
         direction: 'row',
         first: 'nodeManager',
@@ -85,6 +91,12 @@ const MosaicDashboard: React.FC = () => {
         return (
           <MosaicWindow<MosaicKey> title="System Telemetry" path={path}>
             <SystemTelemetryPanel />
+          </MosaicWindow>
+        );
+      case 'networkHealthMonitor':
+        return (
+          <MosaicWindow<MosaicKey> title="Connection Health" path={path}>
+            <NetworkHealthTelemetryPanel />
           </MosaicWindow>
         );
       case 'orientationDisplay':
