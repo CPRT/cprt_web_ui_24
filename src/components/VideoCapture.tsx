@@ -38,10 +38,13 @@ const VideoCapturePanel: React.FC = () => {
       name: "/capture_frame",
       serviceType: "interfaces/srv/VideoCapture",
     });
+    const panService = new ROSLIB.Service({
+      ros,
+      name: "/capture_panoramic",
+      serviceType: "interfaces/srv/VideoCapture",
+    });
 
-    const request = new ROSLIB.ServiceRequest({ source, filename });
-
-    captureService.callService(request, (response: VideoCaptureResponse) => {
+    const capture_cb = (response: VideoCaptureResponse) => {
       console.log("Capture response:", response);
       if (response.success) {
         let imageBase64 = "";
@@ -64,7 +67,13 @@ const VideoCapturePanel: React.FC = () => {
       } else {
         console.error("Failed to capture image.");
       }
-    });
+    }
+    const request = new ROSLIB.ServiceRequest({ source, filename });
+    if (source === "Panoramic") {
+      panService.callService(request, capture_cb);
+    } else {
+      captureService.callService(request, capture_cb);
+    }
   };
 
   const saveImage = () => {
