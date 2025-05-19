@@ -61,10 +61,10 @@ const NetworkHealthTelemetryPanel: React.FC = () => {
 
             //TO DO: Modify these to the actual capacity and throughput values in the status json object
             //to find these, search for uplinkCapacity and downlinkCapacity for capacity values and a "througput" array in the json object
-            const uplinkCapacity = data.uplinkCapacity ?? Math.floor(Math.random() * 100) + 50;
-            const downlinkCapacity = data.downlinkCapacity ?? Math.floor(Math.random() * 100) + 50;
-            const uplinkThroughput = data.uplinkThroughput ?? Math.floor(Math.random() * uplinkCapacity);
-            const downlinkThroughput = data.downlinkThroughput ?? Math.floor(Math.random() * downlinkCapacity);
+            const uplinkCapacity = data.uplinkCapacity ?? 0;
+            const downlinkCapacity = data.downlinkCapacity ?? 0;
+            const uplinkThroughput = data.uplinkThroughput ?? 0;
+            const downlinkThroughput = data.downlinkThroughput ?? 0;
 
             setStats({
               uplinkThroughput,
