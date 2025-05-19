@@ -27,12 +27,26 @@ const WebRTCPresetsPanel: React.FC<WebRTCPresetsPanelProps> = ({ onPresetSelect 
       },
     },
     {
-      name: "Test",
+      name: "EEF",
       preset: {
         num_sources: 1,
-        sources: [{ name: "Test", width: 100, height: 100, origin_x: 0, origin_y: 0 }],
+        sources: [{ name: "EndEffector", width: 100, height: 100, origin_x: 0, origin_y: 0 }],
       },
     },
+    {
+      name: "Microscope",
+      preset: {
+        num_sources: 1,
+        sources: [{ name: "Microscope", width: 100, height: 100, origin_x: 0, origin_y: 0 }],
+      },
+    },
+    {
+      name: "Belly",
+      preset: {
+        num_sources: 1,
+        sources: [{ name: "Bottom", width: 100, height: 100, origin_x: 0, origin_y: 0 }],
+      },
+    }
   ];
 
   return (
