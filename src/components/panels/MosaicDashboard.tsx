@@ -65,7 +65,7 @@ const MosaicDashboard: React.FC = () => {
         return (
           <MosaicWindow<MosaicKey> title="Map View" path={path}>
             <div style={{ height: '100%', backgroundColor: '#121212' }}>
-              <MapView />
+              <MapView offline/>
             </div>
           </MosaicWindow>
         );
