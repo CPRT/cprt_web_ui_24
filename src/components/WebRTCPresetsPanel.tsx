@@ -46,6 +46,26 @@ const WebRTCPresetsPanel: React.FC<WebRTCPresetsPanelProps> = ({ onPresetSelect 
         num_sources: 1,
         sources: [{ name: "Bottom", width: 100, height: 100, origin_x: 0, origin_y: 0 }],
       },
+    },
+    {
+      name: "Drive + EEF",
+      preset: {
+        num_sources: 2,
+        sources: [
+          { name: "Drive", width: 100, height: 100, origin_x:0, origin_y: 0},
+          { name: "EndEffector", width: 30, height: 30, origin_x: 70, origin_y: 0}
+        ]
+      },
+    },
+    {
+      name: "EEF + Drive",
+      preset: {
+        num_sources: 2,
+        sources: [
+          { name: "EndEffector", width: 100, height: 100, origin_x: 0, origin_y: 0},
+          { name: "Drive", width: 30, height: 30, origin_x: 70, origin_y: 0}
+        ]
+      }
     }
   ];
 
