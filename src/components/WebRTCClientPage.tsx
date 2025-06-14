@@ -158,6 +158,30 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
       },
     );
   };
+  const callTriggerService = (serviceName: string) => {
+    if (config.mockMode) {
+      console.log("Mock mode enabled. ROS service requests disabled.");
+      return;
+    }
+    if (!ros || rosStatus !== "connected") {
+      console.error("Not connected to ROS");
+      return;
+    }
+
+    const triggerService = new ROSLIB.Service({
+      ros,
+      name:  serviceName || "/trigger_service",
+      serviceType: "std_srvs/srv/Trigger",
+    });
+
+    triggerService.callService({}, (response: { success: boolean; message: string }) => {
+      if (response.success) {
+        console.log("Trigger service succeeded:", response.message);
+      } else {
+        console.error("Trigger service failed:", response.message);
+      }
+    });
+  };
 
   useEffect(() => {
     if (apiRef.current && signalingUrl) {
@@ -180,7 +204,7 @@ const GstWebRTCPage: React.FC<WebRTCClientPageProps> = ({
         <WebRTCPresetsPanel onPresetSelect={newPreset} />
       </div>
       <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center" }}>
-        <WebRTCSignalingConfig onUrlChange={setSignalingUrl} />
+        <WebRTCSignalingConfig onUrlChange={setSignalingUrl} onReset={() => callTriggerService("/reset_video")}/>
       </div>
       <div
         style={{
