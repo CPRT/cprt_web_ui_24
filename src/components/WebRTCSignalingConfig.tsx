@@ -4,9 +4,10 @@ import Cookies from 'js-cookie';
 
 interface WebRTCSignalingConfigProps {
   onUrlChange: (url: string) => void;
+  onReset: () => void;
 }
 
-const WebRTCSignalingConfig: React.FC<WebRTCSignalingConfigProps> = ({ onUrlChange }) => {
+const WebRTCSignalingConfig: React.FC<WebRTCSignalingConfigProps> = ({ onUrlChange, onReset }) => {
   const [url, setUrl] = useState('ws://localhost:8443');
 
   useEffect(() => {
@@ -75,6 +76,26 @@ const WebRTCSignalingConfig: React.FC<WebRTCSignalingConfigProps> = ({ onUrlChan
         onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
       >
         Set Server
+      </button>
+      <button
+        onClick={onReset}
+        style={{
+          padding: '0.75rem 1.25rem',
+          backgroundColor: '#dc3545',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '0.5rem',
+          cursor: 'pointer',
+          fontWeight: 600,
+          fontSize: '0.95rem',
+          transition: 'background-color 0.2s, transform 0.1s',
+        }}
+        onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#A03232')}
+        onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#dc3545')}
+        onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.97)')}
+        onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+      >
+        Reset
       </button>
     </div>
   );
