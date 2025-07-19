@@ -4,16 +4,26 @@ import ROSLIB from 'roslib';
 import { useROS } from '@/ros/ROSContext';
 
 interface GasSensorReading {
-    temperature_c: number;
-    pressure_pa: number;
-    humidity_rh: number;
-    co2_ppm: number;
-    tvoc_ppb: number;
+    temperature_c: number | null;
+    pressure_pa: number | null;
+    humidity_rh: number | null;
+    co2_ppm: number | null;
+    tvoc_ppb: number | null;
+    ozone_ppb: number | null;
+    hydrogen_ppb: number | null;
   }
 
 const SciencePanel: React.FC = () => {
   const { ros } = useROS();
-  const [data, setData] = useState<GasSensorReading | null> (null);
+  const [data, setData] = useState<GasSensorReading> ({
+    temperature_c: null,
+    pressure_pa: null,
+    humidity_rh: null,
+    co2_ppm: null,
+    tvoc_ppb: null,
+    ozone_ppb: null,
+    hydrogen_ppb: null,
+  });
 
   useEffect(() => {
     if (!ros) return; 
@@ -23,19 +33,47 @@ const SciencePanel: React.FC = () => {
         name: '/gas_sensor',
         messageType: 'interfaces/msg/GasSensorReading',
     });
+    const ozoneTopic = new ROSLIB.Topic({
+        ros,
+        name: '/ozone_sensor',
+        messageType: 'std_msgs/Float64',
+    });
+    const hydrogenTopic = new ROSLIB.Topic({
+        ros,
+        name: '/hydrogen_sensor',
+        messageType: 'std_msgs/Float64',
+    });
     
-    const handleReading = (msg: any) => {
-        setData({
-            temperature_c: msg.temperature_c,
-            pressure_pa: msg.pressure_pa,
-            humidity_rh: msg.humidity_rh,
-            co2_ppm: msg.co2_ppm,
-            tvoc_ppb: msg.tvoc_ppb
-        });
+    const handleGasReading = (msg: any) => {
+      data.temperature_c = msg.temperature_c;
+      data.pressure_pa = msg.pressure_pa;
+      data.humidity_rh = msg.humidity_rh;
+      data.co2_ppm = msg.co2_ppm;
+      data.tvoc_ppb = msg.tvoc_ppb;
+      data.ozone_ppb = msg.ozone_ppb;
+      data.hydrogen_ppb = msg.hydrogen_ppb;
+      setData({ ...data }); // Trigger re-render with new data
+    };
+    const handleOzoneReading = (msg: any) => {
+      data.ozone_ppb = msg.data;
+      setData({ ...data });
+    };
+    const handleHydrogenReading = (msg: any) => {
+      data.hydrogen_ppb = msg.data;
+      setData({ ...data });
     };
 
-    gasSensorTopic.subscribe(handleReading);
-    return () => gasSensorTopic.unsubscribe(handleReading);
+    gasSensorTopic.subscribe(handleGasReading);
+    ozoneTopic.subscribe(handleOzoneReading);
+    hydrogenTopic.subscribe(handleHydrogenReading);
+
+    const unsubscribeAll = () => {
+      gasSensorTopic.unsubscribe(handleGasReading);
+      ozoneTopic.unsubscribe(handleOzoneReading);
+      hydrogenTopic.unsubscribe(handleHydrogenReading);
+    };
+    
+    return () => unsubscribeAll();
 }, [ros]); 
 
 return (
@@ -71,23 +109,31 @@ return (
             <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '0.5rem', fontSize: '0.8rem' }}>
                 <div style={{ minWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     <label style={{ marginRight: '0.3rem', color: '#aaa' }}>Temperature:</label>
-                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.temperature_c.toFixed(1)}°C</span>
+                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.temperature_c !== null ? data.temperature_c.toFixed(1) : 'N/A'}°C</span>
                 </div>
                 <div style={{ minWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     <label style={{ marginRight: '0.3rem', color: '#aaa' }}>Pressure:</label>
-                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.pressure_pa.toFixed(0)} Pa</span>
+                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.pressure_pa !== null ? data.pressure_pa.toFixed(0) : 'N/A'} Pa</span>
                 </div>
                 <div style={{ minWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     <label style={{ marginRight: '0.3rem', color: '#aaa' }}>Humidity:</label>
-                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.humidity_rh.toFixed(1)}%</span>
+                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.humidity_rh !== null ? data.humidity_rh.toFixed(1) : 'N/A'}%</span>
                 </div>
                 <div style={{ minWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     <label style={{ marginRight: '0.3rem', color: '#aaa' }}>CO₂:</label>
-                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.co2_ppm} ppm</span>
+                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.co2_ppm !== null ? data.co2_ppm : 'N/A'} ppm</span>
                 </div>
                 <div style={{ minWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     <label style={{ marginRight: '0.3rem', color: '#aaa' }}>TVOC:</label>
-                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.tvoc_ppb} ppb</span>
+                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.tvoc_ppb !== null ? data.tvoc_ppb : 'N/A'} ppb</span>
+                </div>
+                <div style={{ minWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <label style={{ marginRight: '0.3rem', color: '#aaa' }}>Ozone:</label>
+                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.ozone_ppb !== null ? data.ozone_ppb.toFixed(2) : 'N/A'} ppb</span>
+                </div>
+                <div style={{ minWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <label style={{ marginRight: '0.3rem', color: '#aaa' }}>H2:</label>
+                    <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.hydrogen_ppb !== null ? data.hydrogen_ppb.toFixed(2) : 'N/A'} ppb</span>
                 </div>
             </div>
           </li>
