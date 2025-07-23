@@ -45,14 +45,9 @@ const MosaicDashboard: React.FC = () => {
       },
       second: {
         direction: 'row',
-        first: 'nodeManager',
-        second: {
-          direction: 'row',
-          first: 'waypointList',
-          second: 'gasSensor',  // Add your panel here
-          splitPercentage: 70,
-        },
-        splitPercentage: 50,
+        first: 'waypointList',
+        second: 'gasSensor',
+        splitPercentage: 70,
       },
       splitPercentage: 40,
     },
