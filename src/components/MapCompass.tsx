@@ -23,6 +23,7 @@ const headingFromQuaternion = (q: Quaternion): number => {
 const MapCompass: React.FC = () => {
     const { ros, connectionStatus: rosStatus } = useROS();
     const [heading, setHeading] = useState<number | null>(null);
+    const [valid, setValid] = useState<boolean>(false);
 
     useEffect(() => {
         if (!ros) return;
@@ -35,18 +36,18 @@ const MapCompass: React.FC = () => {
         });
 
         const handleHeading = (msg: any) => {
+            if (msg.orientation_covariance[8] > 50) {
+                setValid(false);
+                return;
+            }
             const heading = headingFromQuaternion(msg.orientation);
+            setValid(true);
             setHeading(heading);
         };
 
         headingTopic.subscribe(handleHeading);
         return () => headingTopic.unsubscribe(handleHeading);
     }, [ros]);
-
-    // make sure compass is working
-    // useEffect(() =>{
-    //     setHeading(Math.random() * 360)
-    // }, [heading])
 
     return(
         <div> 
@@ -56,8 +57,8 @@ const MapCompass: React.FC = () => {
                 {/* <!-- Compass Needle --> */}
                 <polygon
                     id="compass-needle"
-                    points="100,20 95,100 100,180 105,100"
-                    fill="red"
+                    points="100,20 90,100 95,100 95,160 105,160 105,100 110,100"
+                    fill={valid ? "red" : "grey"}
                     stroke="black"
                     strokeWidth="1"
                     transform={`rotate(${heading} 100 100)`}
