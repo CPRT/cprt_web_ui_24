@@ -24,7 +24,7 @@ const BreadcrumbTrail: React.FC = () => {
 
     const fixTopic = new ROSLIB.Topic({
       ros,
-      name: '/fix',
+      name: '/gps/fix',
       messageType: 'sensor_msgs/NavSatFix',
     });
 
