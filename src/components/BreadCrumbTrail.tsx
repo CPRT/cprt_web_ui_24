@@ -5,11 +5,19 @@ import { Polyline, Marker, Popup } from 'react-leaflet';
 import { useROS } from '@/ros/ROSContext';
 import { useWaypoints } from '@/contexts/WaypointContext';
 import ROSLIB from 'roslib';
+import L from 'leaflet'
 
 interface Breadcrumb {
   coordinate: [number, number];
   timestamp: number;
 }
+
+const breadcrumbIcon = L.icon({
+  iconUrl: '../../public/marker-icon.png',
+  iconSize: [10, 10],
+  iconAnchor: [5, 5],
+  popupAnchor: [0, -5],
+});
 
 const BreadcrumbTrail: React.FC = () => {
   const { ros, connectionStatus } = useROS();
@@ -97,7 +105,7 @@ const BreadcrumbTrail: React.FC = () => {
         />
       )}
       {breadcrumbs.map((breadcrumb, index) => (
-        <Marker key={index} position={breadcrumb.coordinate}>
+        <Marker key={index} position={breadcrumb.coordinate} icon={breadcrumbIcon}>
           <Popup>
             <div style={{ fontSize: '0.85rem' }}>
               Recorded at: {new Date(breadcrumb.timestamp).toLocaleTimeString()}

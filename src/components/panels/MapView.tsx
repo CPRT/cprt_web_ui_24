@@ -7,6 +7,7 @@ import { useWaypoints } from '@/contexts/WaypointContext';
 import BreadcrumbTrail from '../BreadCrumbTrail';
 import WaypointCreatorWindow from '../WaypointCreatorWindow';
 import MapInteractionHandler from '../MapInteractionHandler';
+import MapCompass from '../MapCompass';
 
 const getCustomIcon = (color: string) =>
   L.divIcon({
@@ -26,7 +27,7 @@ const MapView: React.FC<MapViewProps> = ({offline}) => {
   return (
     <MapContainer
       center={[45.387295, -75.700974]} 
-      zoom={0}
+      zoom={15}
       style={{ height: '100%', width: '100%' }}
     >
       <TileLayer
@@ -69,6 +70,19 @@ const MapView: React.FC<MapViewProps> = ({offline}) => {
         }}>
         <BreadcrumbTrail />
         <WaypointCreatorWindow />
+      </div>
+      <div
+        style={{
+            position: 'absolute',
+            bottom: 10,
+            left: 10,
+            zIndex: 1000,
+            borderRadius: '8px',
+            color: '#fff',
+            fontSize: '0.9rem',
+            maxWidth: '300px',
+          }}>
+        <MapCompass/>
       </div>
     </MapContainer>
   );
