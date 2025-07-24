@@ -105,12 +105,14 @@ const OrientationDisplayPanel: React.FC = () => {
       messageType: 'sensor_msgs/Imu',
       throttle_rate: 100,
     });
-
+    const ZedOffset = 0.33;
     const handleIMU = (msg: any) => {
       const { x, y, z, w } = msg.orientation;
       const newQuat = new THREE.Quaternion(-y, z, -x, w).normalize();
       const euler = new THREE.Euler().setFromQuaternion(newQuat, 'YXZ');
       euler.y = 0;
+      // Apply offset to pitch for Zed orientation
+      euler.x += ZedOffset;
       const rollPitchQuat = new THREE.Quaternion().setFromEuler(euler);
       cubeRef.current!.quaternion.copy(rollPitchQuat);
     };
