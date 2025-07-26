@@ -9,11 +9,6 @@ import {
   Cell,
   LabelList,
 } from "recharts";
-
-const USERNAME = "ubnt"
-const PASSWORD = "samitherover"
-const baseStationIP = "192.168.0.2"
-
 const NetworkHealthTelemetryPanel: React.FC = () => {
   const [stats, setStats] = useState({
     uplinkThroughput: 0,
@@ -24,76 +19,43 @@ const NetworkHealthTelemetryPanel: React.FC = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-
-    const authenticateAndStartPolling = async () => {
+    // Polling function to fetch data from the API route
+    const poll = async () => {
       try {
-        // Step 1: Authenticate once
-        const authResponse = await fetch(`http://${baseStationIP}/api/auth`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: USERNAME,
-            password: PASSWORD,
-          }),
-          credentials: "include", // Include cookies for session
+        const response = await fetch("/dashboard/api", {
+          method: "GET",
         });
-
-        if (!authResponse.ok) {
-          console.error("Authentication failed");
+        if (!response.ok) {
+          console.error("Failed to fetch status from API route");
+          return;
         }
+        const data = await response.json();
 
-        // Step 2: Start polling
-        const poll = async () => {
-          try {
-            const statusResponse = await fetch(`http://${baseStationIP}/status.cgi`, {
-              method: "GET",
-              credentials: "include",
-            });
+        const uplinkCapacity = data.wireless.polling.ucap ?? 0;
+        const downlinkCapacity = data.wireless.polling.dcap ?? 0;
+        const uplinkThroughput = data.wireless.throughput.tx ?? 0;
+        const downlinkThroughput = data.wireless.throughput.rx ?? 0;
 
-            if (!statusResponse.ok) {
-              console.error("Failed to fetch status");
-            }
-
-            const data = await statusResponse.json();
-            
-
-            //TO DO: Modify these to the actual capacity and throughput values in the status json object
-            //to find these, search for uplinkCapacity and downlinkCapacity for capacity values and a "througput" array in the json object
-            const uplinkCapacity = data.uplinkCapacity ?? 0;
-            const downlinkCapacity = data.downlinkCapacity ?? 0;
-            const uplinkThroughput = data.uplinkThroughput ?? 0;
-            const downlinkThroughput = data.downlinkThroughput ?? 0;
-
-            setStats({
-              uplinkThroughput,
-              downlinkThroughput,
-              uplinkCapacity,
-              downlinkCapacity,
-            });
-          } catch (error) {
-            console.error("Polling error:", error);
-          }
-        };
-
-        // Initial poll + start interval
-        await poll();
-        interval = setInterval(poll, 1000);
-
+        setStats({
+          uplinkThroughput,
+          downlinkThroughput,
+          uplinkCapacity,
+          downlinkCapacity,
+        });
       } catch (error) {
-        console.error("Authentication or polling setup failed:", error);
+        console.error("Polling error:", error);
       }
     };
 
-    authenticateAndStartPolling();
+    // Initial poll + start interval
+    poll();
+    interval = setInterval(poll, 1000);
 
     // Cleanup on unmount
     return () => {
       if (interval) clearInterval(interval);
     };
   }, []);
-
 
   const data = [
     {
