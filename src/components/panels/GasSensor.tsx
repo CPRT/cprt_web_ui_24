@@ -11,6 +11,7 @@ interface GasSensorReading {
     tvoc_ppb: number | null;
     ozone_ppb: number | null;
     hydrogen_ppb: number | null;
+    geiger: number | null;
   }
 
 const SciencePanel: React.FC = () => {
@@ -23,6 +24,7 @@ const SciencePanel: React.FC = () => {
     tvoc_ppb: null,
     ozone_ppb: null,
     hydrogen_ppb: null,
+    geiger: null,
   });
 
   useEffect(() => {
@@ -42,6 +44,11 @@ const SciencePanel: React.FC = () => {
       ros,
       name: '/hydrogen_sensor',
       messageType: 'std_msgs/Float64',
+    });
+    const geigerTopic = new ROSLIB.Topic({
+      ros,
+      name: '/geiger_counts',
+      messageType: 'std_msgs/Float32',
     });
 
     const handleGasReading = (msg: any) => {
@@ -68,15 +75,23 @@ const SciencePanel: React.FC = () => {
         hydrogen_ppb: msg.data,
       }));
     };
+    const handleGeigerReading = (msg: any) => {
+      setData(prev => ({
+        ...prev,
+        geiger: msg.data,
+      }));
+    };
 
     gasSensorTopic.subscribe(handleGasReading);
     ozoneTopic.subscribe(handleOzoneReading);
     hydrogenTopic.subscribe(handleHydrogenReading);
+    geigerTopic.subscribe(handleGeigerReading);
 
     return () => {
       gasSensorTopic.unsubscribe(handleGasReading);
       ozoneTopic.unsubscribe(handleOzoneReading);
       hydrogenTopic.unsubscribe(handleHydrogenReading);
+      geigerTopic.unsubscribe(handleGeigerReading);
     };
 }, [ros]);
 
@@ -134,6 +149,10 @@ return (
               <div style={{ minWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   <label style={{ marginRight: '0.3rem', color: '#aaa' }}>H2:</label>
                   <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.hydrogen_ppb !== null ? data.hydrogen_ppb.toFixed(2) : 'N/A'} ppb</span>
+              </div>
+              <div style={{ minWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <label style={{ marginRight: '0.3rem', color: '#aaa' }}>H2:</label>
+                  <span style={{ color: '#f1f1f1', fontSize: '0.8rem' }}>{data.geiger !== null ? data.geiger.toFixed(2) : 'N/A'} uSv/h</span>
               </div>
           </div>
         </li>
