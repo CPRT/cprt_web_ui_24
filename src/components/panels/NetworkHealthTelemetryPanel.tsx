@@ -31,10 +31,10 @@ const NetworkHealthTelemetryPanel: React.FC = () => {
         }
         const data = await response.json();
 
-        const uplinkCapacity = data.wireless.polling.ucap ?? 0;
-        const downlinkCapacity = data.wireless.polling.dcap ?? 0;
-        const uplinkThroughput = data.wireless.throughput.tx ?? 0;
-        const downlinkThroughput = data.wireless.throughput.rx ?? 0;
+        const uplinkCapacity = data.uplinkCapacity ?? 0;
+        const downlinkCapacity = data.downlinkCapacity ?? 0;
+        const uplinkThroughput = data.uplinkThroughput?? 0;
+        const downlinkThroughput = data.downlinkThroughput ?? 0;
 
         setStats({
           uplinkThroughput,
@@ -57,16 +57,17 @@ const NetworkHealthTelemetryPanel: React.FC = () => {
     };
   }, []);
 
+  // rounded throughput kbps / 10 to get 2 decimal places, then divided by 100 to finish conversion to Mbps
   const data = [
     {
       name: "Uplink",
-      Throughput: stats.uplinkThroughput,
-      Capacity: stats.uplinkCapacity,
+      Throughput: Math.round(stats.uplinkThroughput / 10) / 100,
+      Capacity: stats.uplinkCapacity / 1000,
     },
     {
       name: "Downlink",
-      Throughput: stats.downlinkThroughput,
-      Capacity: stats.downlinkCapacity,
+      Throughput: Math.round(stats.downlinkThroughput / 10) / 100,
+      Capacity: stats.downlinkCapacity / 1000,
     },
   ];
 
@@ -93,7 +94,7 @@ const NetworkHealthTelemetryPanel: React.FC = () => {
           paddingBottom: "0.5rem",
         }}
       >
-        Connection Health
+        Connection Health (Mbps)
       </h3>
 
       <div style={{ marginTop: "2rem", height: "250px" }}>
