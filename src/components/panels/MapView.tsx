@@ -26,11 +26,13 @@ const MapView: React.FC<MapViewProps> = ({offline}) => {
 
   return (
     <MapContainer
-      center={[45.387295, -75.700974]} 
+      center={[51.471531, -112.705753]} 
       zoom={15}
+      maxZoom={22}
       style={{ height: '100%', width: '100%' }}
     >
       <TileLayer
+        maxZoom = {22}
         url={offline? "http://localhost:80/{z}/{x}/{y}.png" : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
         attribution="&copy; Maptiler server"
       />

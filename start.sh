@@ -7,6 +7,4 @@ fi
 
 docker run --rm --name tiling-server-container -d --network=host tiling-server
 
-npm run build
-
 npm run start
