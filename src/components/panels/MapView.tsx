@@ -8,6 +8,9 @@ import BreadcrumbTrail from '../BreadCrumbTrail';
 import WaypointCreatorWindow from '../WaypointCreatorWindow';
 import MapInteractionHandler from '../MapInteractionHandler';
 import MapCompass from '../MapCompass';
+import { useEnvContext } from 'next-runtime-env';
+
+
 
 const getCustomIcon = (color: string) =>
   L.divIcon({
@@ -23,6 +26,8 @@ type MapViewProps = {
 
 const MapView: React.FC<MapViewProps> = ({offline}) => {
   const { waypoints } = useWaypoints();
+  const { NEXT_PUBLIC_TILE_SERVER } = useEnvContext();
+  const tileServer = NEXT_PUBLIC_TILE_SERVER || "localhost:80";
 
   return (
     <MapContainer
@@ -33,7 +38,7 @@ const MapView: React.FC<MapViewProps> = ({offline}) => {
     >
       <TileLayer
         maxZoom = {22}
-        url={offline? "http://localhost:80/{z}/{x}/{y}.png" : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+        url={offline? `http://${tileServer}/{z}/{x}/{y}.png` : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
         attribution="&copy; Maptiler server"
       />
       <MapInteractionHandler />

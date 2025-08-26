@@ -4,6 +4,8 @@ import React from 'react';
 import "./globals.css";
 import { ROSProvider } from "@/ros/ROSContext";
 import { WaypointProvider } from "@/contexts/WaypointContext";
+import { PublicEnvProvider } from 'next-runtime-env';
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,12 +29,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-
-        <WaypointProvider>
-          <ROSProvider>
-            {children}
-          </ROSProvider>
-        </WaypointProvider>
+        <PublicEnvProvider>
+          <WaypointProvider>
+            <ROSProvider>
+              {children}
+            </ROSProvider>
+          </WaypointProvider>
+        </PublicEnvProvider>
       </body>
     </html>
   );
