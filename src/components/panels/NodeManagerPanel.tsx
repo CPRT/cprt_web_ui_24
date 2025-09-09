@@ -5,8 +5,20 @@ import { useROS } from '@/ros/ROSContext';
 import ROSLIB from 'roslib';
 
 interface NodeInfo {
-  name: string;
+  display_name: string;
+  internal_name: string;
   status: 'running' | 'stopped' | 'error';
+}
+
+interface NodeInfoMessage {
+  display_name: string;
+  internal_name: string;
+  package: string;
+  launch_file: string;
+  status: "running" | "stopped";
+}
+interface NodeList {
+  nodes: NodeInfoMessage[];
 }
 
 const NodeManagerPanel: React.FC = () => {
@@ -20,11 +32,15 @@ const NodeManagerPanel: React.FC = () => {
     const listService = new ROSLIB.Service({
       ros: ros,
       name: '/node_manager/list_nodes',
-      serviceType: 'NodeManager/ListNodes',
+      serviceType: 'interfaces/srv/ListNodes',
     });
     const request = new ROSLIB.ServiceRequest({});
-    listService.callService(request, (result: any) => {
-      setNodes(result.nodes);
+    listService.callService(request, (result: NodeList) => {
+      setNodes(result.nodes.map((node, _) => ({
+        display_name: node.display_name,
+        internal_name: node.internal_name,
+        status: node.status,
+      })));
       setLoading(false);
     });
   };
@@ -37,14 +53,14 @@ const NodeManagerPanel: React.FC = () => {
   }, [ros, connectionStatus]);
 
   // service to do basic operations on the nodes and shit
-  const callNodeService = (serviceName: 'start' | 'stop' | 'restart', nodeName: string) => {
+  const callNodeService = (serviceName: 'launch_node' | 'stop_node', serviceType: 'LaunchNode' | 'StopNode', serviceObject: object) => {
     if (!ros || connectionStatus !== 'connected') return;
     const service = new ROSLIB.Service({
       ros: ros,
-      name: `/node_manager/${serviceName}`,
-      serviceType: `NodeManager/${capitalizeFirstLetter(serviceName)}Node`,
+      name: `node_manager/${serviceName}`,
+      serviceType: `interfaces/srv/${serviceType}`,
     });
-    const request = new ROSLIB.ServiceRequest({ node_name: nodeName });
+    const request = new ROSLIB.ServiceRequest(serviceObject);
     service.callService(request, (result: any) => {
       console.log(`${serviceName} result: `, result);
       // run it back
@@ -52,11 +68,9 @@ const NodeManagerPanel: React.FC = () => {
     });
   };
 
-  const handleStart = (nodeName: string) => callNodeService('start', nodeName);
-  const handleStop = (nodeName: string) => callNodeService('stop', nodeName);
-  const handleRestart = (nodeName: string) => callNodeService('restart', nodeName);
-
-  const capitalizeFirstLetter = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const handleStart = (nodeName: string) => callNodeService('launch_node', 'LaunchNode', {name: nodeName});
+  const handleStop = (nodeName: string) => callNodeService('stop_node', 'StopNode', {name: nodeName});
+  // const handleRestart = (nodeName: string) => callNodeService('restart', nodeName);
 
   return (
     <div style={{ padding: '1rem', backgroundColor: '#1e1e1e', color: '#f1f1f1', height: '100%', overflowY: 'auto' }}>
@@ -81,19 +95,20 @@ const NodeManagerPanel: React.FC = () => {
               </thead>
               <tbody>
                 {nodes.map((node) => (
-                  <tr key={node.name}>
-                    <td style={{ border: '1px solid #444', padding: '0.5rem' }}>{node.name}</td>
+                  <tr key={node.internal_name}>
+                    <td style={{ border: '1px solid #444', padding: '0.5rem' }}>{node.display_name}</td>
                     <td style={{ border: '1px solid #444', padding: '0.5rem' }}>{node.status}</td>
                     <td style={{ border: '1px solid #444', padding: '0.5rem' }}>
-                      <button onClick={() => handleStart(node.name)} style={{ marginRight: '0.5rem' }}>
+                      <button onClick={() => handleStart(node.internal_name)} style={{ marginRight: '0.5rem' }}>
                         Start
                       </button>
-                      <button onClick={() => handleStop(node.name)} style={{ marginRight: '0.5rem' }}>
+                      <button onClick={() => handleStop(node.internal_name)} style={{ marginRight: '0.5rem' }}>
                         Stop
                       </button>
-                      <button onClick={() => handleRestart(node.name)}>
+                      {//TODO: restarting?
+                      /* <button onClick={() => handleRestart(node.name)}>
                         Restart
-                      </button>
+                      </button> */}
                     </td>
                   </tr>
                 ))}
